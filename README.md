@@ -2,10 +2,10 @@
 
 ## Description
 
-This will be the App for scity.bik
+This will be the App for scity.bike
 
 ## setup
 
-'''
+```
 npm install -g expo-cli
-'''
+```
