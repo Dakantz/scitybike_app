@@ -12,7 +12,8 @@ import {
   Grid,
   Col
 } from "native-base";
-class AppState {
+import { StoreProps } from "../store";
+class LoginState {
   signup = true;
   username: string;
   email: string;
@@ -23,10 +24,13 @@ class AppState {
   constructor() {}
 }
 
-export default class LoginSignupScreen extends React.Component<{}, AppState> {
+export default class LoginSignupScreen extends React.Component<
+  StoreProps,
+  LoginState
+> {
   constructor(props) {
     super(props);
-    this.state = new AppState();
+    this.state = new LoginState();
   }
   onChangeUserName(username) {
     this.setState({ username });
@@ -46,7 +50,19 @@ export default class LoginSignupScreen extends React.Component<{}, AppState> {
   toggleSignup() {
     this.setState({ signup: !this.state.signup });
   }
-  submit() {}
+  submit() {
+    if (this.state.signup) {
+      this.props.createUser(
+        this.state.username,
+        this.state.email,
+        this.state.first_name,
+        this.state.last_name,
+        this.state.password
+      );
+    } else {
+      this.props.login(this.state.username, this.state.password);
+    }
+  }
   render() {
     return (
       <Container>

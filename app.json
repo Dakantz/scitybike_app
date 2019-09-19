@@ -24,7 +24,8 @@
       "api_host": "http://localhost:8080",
       "auth0": {
         "clientId": "3TrDRbLTdq6eTh8k2oYxDTGQLtpLpzwi",
-        "domain": "scity-bike.eu.auth0.com"
+        "domain": "scity-bike.eu.auth0.com",
+        "connection": "Username-Password-Authentication"
       }
     }
   }

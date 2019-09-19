@@ -1,17 +1,15 @@
-import { UserActionTypes,UserActions ,UserState} from "./types";
+import { UserActionDefs, UserActions, UserState } from "./types";
+import { setToken } from "../../helpers";
 
 const initialState = new UserState();
 
 export function userReducer(
   state = initialState,
-  action: UserActionTypes
+  action: UserActionDefs
 ): UserState {
   switch (action.type) {
-    case UserActions.LOGIN: {
-
-    }
-    case UserActions.SIGNUP: {
-        
+    case UserActions.SET_PROPS: {
+      return { ...state, ...action.props };
     }
     default:
       return state;

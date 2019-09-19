@@ -17,3 +17,19 @@ export const MUT_CREATE_USER = gql`
     }
   }
 `;
+export const GET_ME = gql`
+  query Me {
+    me {
+      ... on User {
+        id
+        username
+        email
+        first_name
+        last_name
+      }
+      ... on UserFetchError {
+        error
+      }
+    }
+  }
+`;
