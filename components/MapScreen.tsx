@@ -4,20 +4,13 @@ import {
   Text,
   Header,
   Content,
-  Form,
-  Item,
-  Label,
-  Input,
-  Button,
-  Grid,
-  Col
 } from "native-base";
-import {  StoreProps } from "../store";
+import { StoreProps, connection } from "../store";
 class MapScreenState {}
-export default class MapScreen extends React.Component<
-  StoreProps,
-  MapScreenState
-> {
+class MapScreen extends React.Component<StoreProps, MapScreenState> {
+  static navigationOptions = {
+    header: null
+  };
   constructor(props) {
     super(props);
     this.state = new MapScreenState();
@@ -38,3 +31,4 @@ export default class MapScreen extends React.Component<
     );
   }
 }
+export default connection(MapScreen);

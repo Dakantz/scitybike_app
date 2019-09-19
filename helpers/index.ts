@@ -8,9 +8,9 @@ class Auth0Info {
   constructor() {
     this.client = new Auth0({
       domain: Constants.manifest.extra.auth0.domain,
-      clientId: Constants.manifest.extra.clientId
+      clientId: Constants.manifest.extra.auth0.clientId
     });
-    this.connection = Constants.manifest.extra.connection;
+    this.connection = Constants.manifest.extra.auth0.connection;
   }
 }
 let apolloClient = new ApolloClient({

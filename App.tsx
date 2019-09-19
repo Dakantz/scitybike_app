@@ -1,22 +1,36 @@
 import React from "react";
 import { AppLoading } from "expo";
-import { Container, Text } from "native-base";
 import * as Font from "expo-font";
 import { Ionicons } from "@expo/vector-icons";
 import { createAppContainer, createSwitchNavigator } from "react-navigation";
 import { createStackNavigator } from "react-navigation-stack";
-import LoginSignupScreen from "./components/MapScreen";
+import LoginSignupScreen from "./components/LoginSignupScreen";
 import MapScreen from "./components/MapScreen";
 import { configureStore } from "./store";
 import { Provider } from "react-redux";
 import Startupscreen from "./components/StartupScreen";
+import NavigationService from "./NavigationService";
 class AppState {
   isReady = false;
 }
-const AuthenticationNavigator = createStackNavigator(
+
+const AppNavigator = createStackNavigator(
+  {
+    /*
+     * Rather than being rendered by a screen component, the
+     * AuthenticationNavigator is a screen component
+     */
+    Map: MapScreen
+  },
+  {
+    initialRouteName: "Map"
+  }
+);
+const AuthenticationNavigator = createSwitchNavigator(
   {
     Signin: LoginSignupScreen,
-    Startup: Startupscreen
+    Startup: Startupscreen,
+    Home: AppNavigator
     //TODO ForgotPassword: ForgotPasswordScreen,
   },
   {
@@ -24,21 +38,7 @@ const AuthenticationNavigator = createStackNavigator(
   }
 );
 
-const AppNavigator = createSwitchNavigator(
-  {
-    /*
-     * Rather than being rendered by a screen component, the
-     * AuthenticationNavigator is a screen component
-     */
-    Auth: AuthenticationNavigator,
-    Map: MapScreen
-  },
-  {
-    initialRouteName: "Auth"
-  }
-);
-
-const AppContainer = createAppContainer(AppNavigator);
+const AppContainer = createAppContainer(AuthenticationNavigator);
 const store = configureStore();
 export default class App extends React.Component<{}, AppState> {
   constructor(props) {
@@ -59,10 +59,13 @@ export default class App extends React.Component<{}, AppState> {
     if (!this.state.isReady) {
       return <AppLoading />;
     }
-
     return (
-      <Provider store={store}>
-        <AppContainer />
+      <Provider store={store} con>
+        <AppContainer
+          ref={navigatorRef => {
+            NavigationService.setTopLevelNavigator(navigatorRef);
+          }}
+        />
       </Provider>
     );
   }

@@ -15,6 +15,7 @@ import {
   MeDocument,
   UserResult
 } from "../../generated/graphql";
+import NavigationService from "../../NavigationService";
 export class UserState {
   loggedIn: boolean = false;
   loggingIn: boolean = false;
@@ -64,6 +65,7 @@ export const login = function(
 ): ThunkAction<Promise<void>, {}, {}, AnyAction> {
   return async (dispatch: ThunkDispatch<{}, {}, AnyAction>): Promise<void> => {
     try {
+      console.log("Login!");
       dispatch(setProps({ loggingIn: true }));
       await SecureStore.setItemAsync("username", username);
       await SecureStore.setItemAsync("password", password);
@@ -81,11 +83,7 @@ export const login = function(
           loginFailed: false
         })
       );
-      dispatch(
-        NavigationActions.navigate({
-          routeName: "Map"
-        })
-      );
+      NavigationService.navigate("Map");
     } catch (e) {
       dispatch(
         setProps({
@@ -108,6 +106,7 @@ export const createUser = function(
 ): ThunkAction<Promise<void>, {}, {}, AnyAction> {
   return async (dispatch: ThunkDispatch<{}, {}, AnyAction>): Promise<void> => {
     try {
+      console.log("Creating user");
       dispatch(setProps({ signingUp: true }));
       await SecureStore.setItemAsync("username", username);
       await SecureStore.setItemAsync("password", password);
@@ -147,11 +146,7 @@ export const createUser = function(
           })
         );
 
-        dispatch(
-          NavigationActions.navigate({
-            routeName: "Map"
-          })
-        );
+        NavigationService.navigate("Map");
       }
     } catch (e) {
       dispatch(
@@ -173,6 +168,7 @@ export const relogin = function(): ThunkAction<
   AnyAction
 > {
   return async (dispatch: ThunkDispatch<{}, {}, AnyAction>): Promise<void> => {
+    console.log("Relogin!");
     try {
       dispatch(setProps({ loggingIn: true }));
       let token = await SecureStore.getItemAsync("token");
@@ -192,11 +188,7 @@ export const relogin = function(): ThunkAction<
           let username = await SecureStore.getItemAsync("username");
           let password = await SecureStore.getItemAsync("password");
           if (!(username && password)) {
-            dispatch(
-              NavigationActions.navigate({
-                routeName: "Signin"
-              })
-            );
+            NavigationService.navigate("Signin");
           }
           let loginResult = await auth0.client.auth.passwordRealm({
             username,
@@ -206,28 +198,18 @@ export const relogin = function(): ThunkAction<
           dispatch(setTokenState(loginResult.token));
         }
         //If both succeeded, got to map
-        dispatch(
-          NavigationActions.navigate({
-            routeName: "Map"
-          })
-        );
+        NavigationService.navigate("Map");
       } else {
-        dispatch(
-          NavigationActions.navigate({
-            routeName: "Signin"
-          })
-        );
+        console.log("Going to signin!", NavigationActions);
+        NavigationService.navigate("Signin");
       }
     } catch (e) {
-      dispatch(
-        NavigationActions.navigate({
-          routeName: "Signin"
-        })
-      );
+      NavigationService.navigate("Sigin");
       dispatch(
         setProps({
-          signingUp: false,
-          signupFailed: true,
+          loggedIn: false,
+          loginFailed: true,
+          loggingIn: false,
           lastError: "Failed to Login, reason: " + e.message
         })
       );

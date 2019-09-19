@@ -27,7 +27,7 @@ export function configureStore() {
 class AllDispatch {
   constructor(
     public relogin = reloginD,
-    public login = login,
+    public login = loginD,
     public createUser = createUserD
   ) {}
 }
@@ -36,16 +36,20 @@ const mapDispatchToProps = dispatch => {
   let obj: any = {};
   for (const key in allDispatchers) {
     if (allDispatchers.hasOwnProperty(key)) {
-      const dispatcher = AllDispatch[key];
-      obj[key] = (...args) => dispatch(dispatcher(...args));
+      const dispatcher = allDispatchers[key];
+      obj[key] = (...args) => {
+        if (args && args.length > 0) dispatch(dispatcher(...args));
+        else dispatch(dispatcher());
+      };
     }
   }
   return obj;
 };
 type AppState = ReturnType<typeof rootReducer>;
 type StoreProps = AppState & AllDispatch;
-let connection: StoreProps = connect(
+let connection = connect(
   state => state,
   mapDispatchToProps
 );
-export { connection, StoreProps };
+
+export { StoreProps, connection };

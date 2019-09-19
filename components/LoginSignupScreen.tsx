@@ -12,45 +12,43 @@ import {
   Grid,
   Col
 } from "native-base";
-import { StoreProps } from "../store";
+import { StoreProps, connection } from "../store";
 class LoginState {
-  signup = true;
-  username: string;
-  email: string;
-  first_name: string;
+  signup? = true;
+  username?: string;
+  email?: string;
+  first_name?: string;
 
-  last_name: string;
-  password: string;
+  last_name?: string;
+  password?: string;
   constructor() {}
 }
 
-export default class LoginSignupScreen extends React.Component<
-  StoreProps,
-  LoginState
-> {
+class LoginSignupScreen extends React.Component<StoreProps, LoginState> {
   constructor(props) {
     super(props);
-    this.state = new LoginState();
+    this.state = {};
   }
-  onChangeUserName(username) {
+  public componentDidMount() {}
+  public onChangeUserName = username => {
     this.setState({ username });
-  }
-  onChangeFirstName(first_name) {
+  };
+  public onChangeFirstName = first_name => {
     this.setState({ first_name });
-  }
-  onChangeLastName(last_name) {
+  };
+  public onChangeLastName = last_name => {
     this.setState({ last_name });
-  }
-  onChangeEmail(email) {
+  };
+  public onChangeEmail = email => {
     this.setState({ email });
-  }
-  onChangePassword(password) {
+  };
+  public onChangePassword = password => {
     this.setState({ password });
-  }
-  toggleSignup() {
+  };
+  public toggleSignup = () => {
     this.setState({ signup: !this.state.signup });
-  }
-  submit() {
+  };
+  public submit = () => {
     if (this.state.signup) {
       this.props.createUser(
         this.state.username,
@@ -62,7 +60,7 @@ export default class LoginSignupScreen extends React.Component<
     } else {
       this.props.login(this.state.username, this.state.password);
     }
-  }
+  };
   render() {
     return (
       <Container>
@@ -113,3 +111,4 @@ export default class LoginSignupScreen extends React.Component<
     );
   }
 }
+export default connection(LoginSignupScreen);

@@ -2,7 +2,7 @@ import React from "react";
 import { Container, Text, Header, Content, Spinner } from "native-base";
 import { connection, StoreProps } from "../store";
 class StartupScreenState {}
-export default class Startupscreen extends React.Component<
+class Startupscreen extends React.Component<
   StoreProps,
   StartupScreenState
 > {
@@ -21,8 +21,10 @@ export default class Startupscreen extends React.Component<
         <Content>
           <Spinner color="blue" />
           <Text>Trying to log you in from a previous session...</Text>
+          <Text>{this.props.user.lastError}</Text>
         </Content>
       </Container>
     );
   }
 }
+export default connection(Startupscreen)
