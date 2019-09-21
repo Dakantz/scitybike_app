@@ -4,6 +4,7 @@ documents: "./queries/**/*"
 generates:
   generated/graphql.tsx:
     plugins:
+      - fragment-matcher
       - "typescript"
       - "typescript-operations"
       - "typescript-react-apollo"

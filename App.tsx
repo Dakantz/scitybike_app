@@ -14,31 +14,31 @@ class AppState {
   isReady = false;
 }
 
+const AuthenticationNavigator = createSwitchNavigator(
+    {
+      Signin: LoginSignupScreen,
+      Startup: Startupscreen
+      //TODO ForgotPassword: ForgotPasswordScreen,
+    },
+    {
+      initialRouteName: "Startup"
+    }
+  );
 const AppNavigator = createStackNavigator(
   {
     /*
      * Rather than being rendered by a screen component, the
      * AuthenticationNavigator is a screen component
      */
-    Map: MapScreen
+    Map: MapScreen,
+    Auth:AuthenticationNavigator
   },
   {
-    initialRouteName: "Map"
-  }
-);
-const AuthenticationNavigator = createSwitchNavigator(
-  {
-    Signin: LoginSignupScreen,
-    Startup: Startupscreen,
-    Home: AppNavigator
-    //TODO ForgotPassword: ForgotPasswordScreen,
-  },
-  {
-    initialRouteName: "Startup"
+    initialRouteName: "Auth"
   }
 );
 
-const AppContainer = createAppContainer(AuthenticationNavigator);
+const AppContainer = createAppContainer(AppNavigator);
 const store = configureStore();
 export default class App extends React.Component<{}, AppState> {
   constructor(props) {
@@ -47,6 +47,8 @@ export default class App extends React.Component<{}, AppState> {
   }
 
   async componentDidMount() {
+    console.log("Starting Scity.Bike App!");
+
     await Font.loadAsync({
       Roboto: require("native-base/Fonts/Roboto.ttf"),
       Roboto_medium: require("native-base/Fonts/Roboto_medium.ttf"),

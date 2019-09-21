@@ -23,7 +23,8 @@ function navigate(
     NavigationActions.navigate({
       routeName,
       params,
-      action
+      action,
+      
     })
   );
 }

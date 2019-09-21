@@ -13,7 +13,9 @@ import {
   UserCreateError,
   User,
   MeDocument,
-  UserResult
+  UserResult,
+  CreateUserMutation,
+  MeQuery
 } from "../../generated/graphql";
 import NavigationService from "../../NavigationService";
 export class UserState {
@@ -26,6 +28,7 @@ export class UserState {
   token: string;
   username: string;
   email: string;
+  email_verified: string;
   first_name: string;
   last_name: string;
   client: ApolloClient<unknown>;
@@ -50,40 +53,78 @@ export const setTokenState = function(
       await SecureStore.setItemAsync("token", token);
       setToken(token);
       let data = jwt_decode(token);
-      dispatch(
-        setProps({
-          ...data
-        })
-      );
-    } catch (e) {}
+      console.log("JWT data: ", data);
+      let userdata: Partial<UserState> = {
+        email: data.email,
+        first_name: data.given_name,
+        email_verified: data.email_verified,
+        username: data.nickname,
+        token: token
+      };
+      dispatch(setProps(userdata));
+    } catch (e) {
+      console.log("Error parsing token: ", e);
+    }
   };
 };
+export const loginAuth0 = function(
+  email: string,
+  password: string
+): ThunkAction<Promise<void>, {}, {}, AnyAction> {
+  return async (dispatch: ThunkDispatch<{}, {}, AnyAction>): Promise<void> => {
+    try {
+      dispatch(
+        setProps({
+          loggingIn: true
+        })
+      );
+      let loginData = {
+        username: email,
+        password,
+        realm: auth0.connection
+      };
+      console.log(loginData);
+      let loginResult = await auth0.client.auth.passwordRealm(loginData);
+      console.log(loginResult);
+      dispatch(setTokenState(loginResult.idToken));
 
+      dispatch(
+        setProps({
+          loggedIn: true,
+          loginFailed: false,
+          signupFailed: false
+        })
+      );
+
+      NavigationService.navigate("Map");
+    } catch (e) {
+      console.log("Error Logging into Auth0", e);
+
+      dispatch(
+        setProps({
+          lastError: "Error logging in, wrong password/username!",
+          loggedIn: false
+        })
+      );
+    }
+    dispatch(
+      setProps({
+        loggingIn: false
+      })
+    );
+  };
+};
 export const login = function(
-  username: string,
+  email: string,
   password: string
 ): ThunkAction<Promise<void>, {}, {}, AnyAction> {
   return async (dispatch: ThunkDispatch<{}, {}, AnyAction>): Promise<void> => {
     try {
       console.log("Login!");
       dispatch(setProps({ loggingIn: true }));
-      await SecureStore.setItemAsync("username", username);
+      await SecureStore.setItemAsync("email", email);
       await SecureStore.setItemAsync("password", password);
-      let result = await auth0.client.auth.passwordRealm({
-        username,
-        password,
-        realm: auth0.connection
-      });
-      dispatch(setTokenState(result.token));
-      dispatch(
-        setProps({
-          token: result.token,
-          loggedIn: true,
-          signupFailed: false,
-          loginFailed: false
-        })
-      );
-      NavigationService.navigate("Map");
+      dispatch(loginAuth0(email, password));
     } catch (e) {
       dispatch(
         setProps({
@@ -108,13 +149,15 @@ export const createUser = function(
     try {
       console.log("Creating user");
       dispatch(setProps({ signingUp: true }));
-      await SecureStore.setItemAsync("username", username);
+      await SecureStore.setItemAsync("email", email);
       await SecureStore.setItemAsync("password", password);
-      let createResult = await apolloClient.query<
-        UserCreateResult,
+
+      console.log(CreateUserDocument);
+      let createResult = await apolloClient.mutate<
+        CreateUserMutation,
         { userInput: CreateUserInput }
       >({
-        query: CreateUserDocument,
+        mutation: CreateUserDocument,
         variables: {
           userInput: {
             username,
@@ -125,28 +168,18 @@ export const createUser = function(
           }
         }
       });
-      if (createResult.data.__typename == "UserCreateError") {
+
+      console.log("BAckend resp:", createResult.data);
+      if (createResult.data.createUser.__typename == "UserCreateError") {
         throw new Error(
           "Error on Scity.Bike Backend: " +
-            (createResult.data as UserCreateError).error
+            (createResult.data.createUser as UserCreateError).error
         );
       } else {
-        let fetched_user = createResult.data as User;
-        let loginResult = await auth0.client.auth.passwordRealm({
-          username,
-          password,
-          realm: auth0.connection
-        });
-        dispatch(setTokenState(loginResult.token));
-        dispatch(
-          setProps({
-            loggedIn: true,
-            signupFailed: false,
-            loginFailed: false
-          })
-        );
+        console.log("Created user in backend, now Loggin in..");
+        let fetched_user = createResult.data.createUser as User;
 
-        NavigationService.navigate("Map");
+        dispatch(loginAuth0(email, password));
       }
     } catch (e) {
       dispatch(
@@ -156,7 +189,7 @@ export const createUser = function(
           lastError: "Failed to Login, reason: " + e.message
         })
       );
-      console.error(e);
+      console.log("Error creating user: ", e);
     }
   };
 };
@@ -172,12 +205,14 @@ export const relogin = function(): ThunkAction<
     try {
       dispatch(setProps({ loggingIn: true }));
       let token = await SecureStore.getItemAsync("token");
+
+      console.log("Saved token:", token);
       if (token) {
         setToken(token);
-        let fetchResult = await apolloClient.query<UserResult>({
+        let fetchResult = await apolloClient.query<MeQuery>({
           query: MeDocument
         });
-        if (fetchResult.data.__typename == "User") {
+        if (fetchResult.data.me.__typename == "User") {
           dispatch(setTokenState(token));
           dispatch(
             setProps({
@@ -185,20 +220,16 @@ export const relogin = function(): ThunkAction<
             })
           );
         } else {
-          let username = await SecureStore.getItemAsync("username");
+          let email = await SecureStore.getItemAsync("email");
           let password = await SecureStore.getItemAsync("password");
-          if (!(username && password)) {
+          if (!(email && password)) {
             NavigationService.navigate("Signin");
+          } else {
+            dispatch(loginAuth0(email, password));
           }
-          let loginResult = await auth0.client.auth.passwordRealm({
-            username,
-            password,
-            realm: auth0.connection
-          });
-          dispatch(setTokenState(loginResult.token));
         }
         //If both succeeded, got to map
-        NavigationService.navigate("Map");
+        NavigationService.navigate("Map", null, {});
       } else {
         console.log("Going to signin!", NavigationActions);
         NavigationService.navigate("Signin");

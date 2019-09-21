@@ -10,26 +10,39 @@ import {
   Input,
   Button,
   Grid,
-  Col
+  Col,
+  Left,
+  Title,
+  Body,
+  Right,
+  View,
+  Icon
 } from "native-base";
 import { StoreProps, connection } from "../store";
+import { NavigationInjectedProps } from "react-navigation";
 class LoginState {
   signup? = true;
-  username?: string;
-  email?: string;
-  first_name?: string;
+  username?: string = "benedikt3";
+  email?: string = "bene.kantz3@gmail.com";
+  first_name?: string = "Benedikt";
 
-  last_name?: string;
-  password?: string;
+  last_name?: string = "Kantz";
+  password?: string = "Bene220000";
   constructor() {}
 }
 
-class LoginSignupScreen extends React.Component<StoreProps, LoginState> {
+class LoginSignupScreen extends React.Component<
+  StoreProps & NavigationInjectedProps,
+  LoginState
+> {
   constructor(props) {
     super(props);
     this.state = {};
   }
-  public componentDidMount() {}
+  public componentDidMount = () => {
+    console.log(this.state);
+    this.setState({ ...new LoginState() });
+  };
   public onChangeUserName = username => {
     this.setState({ username });
   };
@@ -46,7 +59,9 @@ class LoginSignupScreen extends React.Component<StoreProps, LoginState> {
     this.setState({ password });
   };
   public toggleSignup = () => {
-    this.setState({ signup: !this.state.signup });
+    let signup = !this.state.signup;
+    this.props.navigation.setParams({ signup });
+    this.setState({ signup });
   };
   public submit = () => {
     if (this.state.signup) {
@@ -58,56 +73,75 @@ class LoginSignupScreen extends React.Component<StoreProps, LoginState> {
         this.state.password
       );
     } else {
-      this.props.login(this.state.username, this.state.password);
+      this.props.login(this.state.email , this.state.password);
     }
   };
+  static navigationOptions = ({ navigation }) => {
+    return {
+      headerTitle: navigation.getParam("signup") ? "Sign Up!" : "Login"
+    };
+  };
   render() {
+    console.log(this.state);
     return (
-      <Container>
-        <Header />
-        <Content>
-          <Form>
-            <Item fixedLabel>
-              <Label>Username</Label>
-              <Input onChangeText={this.onChangeUserName} />
-            </Item>
-            {this.state.signup && (
-              <React.Fragment>
-                <Item fixedLabel>
-                  <Label>E-Mail</Label>
-                  <Input onChangeText={this.onChangeEmail} />
-                </Item>
-                <Item fixedLabel>
-                  <Label>First Name</Label>
-                  <Input onChangeText={this.onChangeFirstName} />
-                </Item>
-                <Item fixedLabel>
-                  <Label>Last Name</Label>
-                  <Input onChangeText={this.onChangeLastName} />
-                </Item>
-              </React.Fragment>
-            )}
-            <Item fixedLabel last>
-              <Label>Password</Label>
-              <Input onChangeText={this.onChangePassword} />
-            </Item>
-            <Grid>
-              <Col style={{ height: 100 }}>
-                <Button primary onPress={this.submit}>
-                  <Text> {this.state.signup ? "Sign Up!" : "Login"} </Text>
-                </Button>
-              </Col>
-              <Col style={{ height: 100 }}>
-                <Button transparent onPress={this.toggleSignup}>
-                  <Text>
-                    {this.state.signup ? "Login" : "Sign up"} instead...
-                  </Text>
-                </Button>
-              </Col>
-            </Grid>
-          </Form>
-        </Content>
-      </Container>
+      <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+        <Form>
+          <Item stackedLabel>
+            <Label>E-Mail</Label>
+            <Input
+              onChangeText={this.onChangeEmail}
+              autoCompleteType="email"
+              autoCapitalize="none"
+            />
+          </Item>
+          {this.state.signup && (
+            <React.Fragment>
+              <Item stackedLabel>
+                <Label>Username</Label>
+                <Input
+                  onChangeText={this.onChangeUserName}
+                  autoCompleteType="username"
+                  autoCapitalize="none"
+                />
+              </Item>
+              <Item stackedLabel>
+                <Label>First Name</Label>
+                <Input
+                  onChangeText={this.onChangeFirstName}
+                  autoCompleteType="name"
+                />
+              </Item>
+              <Item stackedLabel>
+                <Label>Last Name</Label>
+                <Input onChangeText={this.onChangeLastName} />
+              </Item>
+            </React.Fragment>
+          )}
+          <Item stackedLabel>
+            <Label>Password</Label>
+            <Input
+              onChangeText={this.onChangePassword}
+              autoCompleteType="password"
+              secureTextEntry={true}
+              autoCapitalize="none"
+            />
+          </Item>
+          <Grid>
+            <Col style={{ height: 100 }}>
+              <Button primary onPress={this.submit}>
+                <Text> {this.state.signup ? "Sign Up!" : "Login"} </Text>
+              </Button>
+            </Col>
+            <Col style={{ height: 100 }}>
+              <Button transparent onPress={this.toggleSignup}>
+                <Text>
+                  {this.state.signup ? "Login" : "Sign up"} instead...
+                </Text>
+              </Button>
+            </Col>
+          </Grid>
+        </Form>
+      </View>
     );
   }
 }
