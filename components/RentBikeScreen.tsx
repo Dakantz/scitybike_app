@@ -45,8 +45,7 @@ class RentBikeScree extends React.Component<StoreProps, RentBikeScreenState> {
       >
         <Text>Rent bike: {bike.name}</Text>
         <Text>Type: {bike.type}</Text>{" "}
-        <Button iconLeft light onPress={this.props.logOut}>
-          <Icon name="log-out" />
+        <Button onPress={this.props.logOut}>
           <Text>🚲 Rent me!</Text>
         </Button>
       </View>
