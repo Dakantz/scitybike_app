@@ -7,8 +7,10 @@ import { connect } from "react-redux";
 import {
   relogin as reloginD,
   createUser as createUserD,
-  login as loginD
+  login as loginD,
+  logOut as logOutD
 } from "./user/types";
+import { NavigationProp, NavigationParams, NavigationContainerProps } from "react-navigation";
 const rootReducer = combineReducers({
   user: userReducer
 });
@@ -28,7 +30,8 @@ class AllDispatch {
   constructor(
     public relogin = reloginD,
     public login = loginD,
-    public createUser = createUserD
+    public createUser = createUserD,
+    public logOut= logOutD
   ) {}
 }
 const allDispatchers = new AllDispatch();
@@ -46,7 +49,7 @@ const mapDispatchToProps = dispatch => {
   return obj;
 };
 type AppState = ReturnType<typeof rootReducer>;
-type StoreProps = AppState & AllDispatch;
+type StoreProps = AppState & AllDispatch & NavigationContainerProps;
 let connection = connect(
   state => state,
   mapDispatchToProps

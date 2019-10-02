@@ -3,6 +3,7 @@ import { AppLoading } from "expo";
 import * as Font from "expo-font";
 import { Ionicons } from "@expo/vector-icons";
 import { createAppContainer, createSwitchNavigator } from "react-navigation";
+import { createDrawerNavigator } from "react-navigation-drawer";
 import { createStackNavigator } from "react-navigation-stack";
 import LoginSignupScreen from "./components/LoginSignupScreen";
 import MapScreen from "./components/MapScreen";
@@ -10,35 +11,59 @@ import { configureStore } from "./store";
 import { Provider } from "react-redux";
 import Startupscreen from "./components/StartupScreen";
 import NavigationService from "./NavigationService";
+import { ApolloProvider } from "react-apollo";
+import { ApolloProvider as ApolloHooksProvider } from "react-apollo-hooks";
+import { apolloClient } from "./helpers";
+import UserScreen from "./components/UserScreen";
+import RentBikeScreen from "./components/RentBikeScreen";
 class AppState {
   isReady = false;
 }
+const MapStack = createStackNavigator(
+  {
+    Main: MapScreen,
+    RentBike: RentBikeScreen
+  },
+  {
+    initialRouteName: "Main"
+  }
+);
 
-const AuthenticationNavigator = createSwitchNavigator(
+const UserStack = createStackNavigator(
     {
-      Signin: LoginSignupScreen,
-      Startup: Startupscreen
-      //TODO ForgotPassword: ForgotPasswordScreen,
+      Main: UserScreen
     },
     {
-      initialRouteName: "Startup"
+      initialRouteName: "Main"
     }
   );
-const AppNavigator = createStackNavigator(
+const AppNavigator = createDrawerNavigator(
   {
     /*
      * Rather than being rendered by a screen component, the
      * AuthenticationNavigator is a screen component
      */
-    Map: MapScreen,
-    Auth:AuthenticationNavigator
+    Map: MapStack,
+    User: UserStack
   },
   {
-    initialRouteName: "Auth"
+    initialRouteName: "Map",
+
+  }
+);
+const AuthenticationNavigator = createSwitchNavigator(
+  {
+    Signin: LoginSignupScreen,
+    Startup: Startupscreen,
+    Home: AppNavigator
+    //TODO ForgotPassword: ForgotPasswordScreen,
+  },
+  {
+    initialRouteName: "Startup"
   }
 );
 
-const AppContainer = createAppContainer(AppNavigator);
+const AppContainer = createAppContainer(AuthenticationNavigator);
 const store = configureStore();
 export default class App extends React.Component<{}, AppState> {
   constructor(props) {
@@ -62,13 +87,17 @@ export default class App extends React.Component<{}, AppState> {
       return <AppLoading />;
     }
     return (
-      <Provider store={store} con>
-        <AppContainer
-          ref={navigatorRef => {
-            NavigationService.setTopLevelNavigator(navigatorRef);
-          }}
-        />
-      </Provider>
+      <ApolloProvider client={apolloClient}>
+        <ApolloHooksProvider client={apolloClient}>
+          <Provider store={store} con>
+            <AppContainer
+              ref={navigatorRef => {
+                NavigationService.setTopLevelNavigator(navigatorRef);
+              }}
+            />
+          </Provider>
+        </ApolloHooksProvider>
+      </ApolloProvider>
     );
   }
 }

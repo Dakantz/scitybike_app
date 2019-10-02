@@ -34,6 +34,7 @@ apolloClient.link = new HttpLink({
   headers
 });
 function setToken(token: string) {
+  console.log("Set token to:", token);
   headers.Authorization = `Bearer ${token}`;
 }
 let auth0 = new Auth0Info();

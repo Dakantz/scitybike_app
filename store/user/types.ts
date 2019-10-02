@@ -100,6 +100,7 @@ export const loginAuth0 = function(
     } catch (e) {
       console.log("Error Logging into Auth0", e);
 
+      NavigationService.navigate("Signin");
       dispatch(
         setProps({
           lastError: "Error logging in, wrong password/username!",
@@ -194,6 +195,33 @@ export const createUser = function(
   };
 };
 
+export const logOut = function(): ThunkAction<
+  Promise<void>,
+  {},
+  {},
+  AnyAction
+> {
+  return async (dispatch: ThunkDispatch<{}, {}, AnyAction>): Promise<void> => {
+    console.log("Log Out!");
+    try {
+      await SecureStore.deleteItemAsync("username");
+      await SecureStore.deleteItemAsync("password");
+      await SecureStore.deleteItemAsync("token");
+      dispatch(setProps({ loggingIn: false }));
+    } catch (e) {
+      NavigationService.navigate("Sigin");
+      dispatch(
+        setProps({
+          loggedIn: false,
+          loginFailed: true,
+          lastError: "Failed to Log Out, reason: " + e.message
+        })
+      );
+      console.error("Error loggin in!", e);
+    }
+    NavigationService.navigate("Sigin");
+  };
+};
 export const relogin = function(): ThunkAction<
   Promise<void>,
   {},
@@ -212,6 +240,7 @@ export const relogin = function(): ThunkAction<
         let fetchResult = await apolloClient.query<MeQuery>({
           query: MeDocument
         });
+        console.log(fetchResult);
         if (fetchResult.data.me.__typename == "User") {
           dispatch(setTokenState(token));
           dispatch(
@@ -228,8 +257,6 @@ export const relogin = function(): ThunkAction<
             dispatch(loginAuth0(email, password));
           }
         }
-        //If both succeeded, got to map
-        NavigationService.navigate("Map", null, {});
       } else {
         console.log("Going to signin!", NavigationActions);
         NavigationService.navigate("Signin");
@@ -244,7 +271,7 @@ export const relogin = function(): ThunkAction<
           lastError: "Failed to Login, reason: " + e.message
         })
       );
-      console.error(e);
+      console.error("Error loggin in!", e);
     }
   };
 };

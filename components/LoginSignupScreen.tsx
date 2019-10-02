@@ -73,7 +73,7 @@ class LoginSignupScreen extends React.Component<
         this.state.password
       );
     } else {
-      this.props.login(this.state.email , this.state.password);
+      this.props.login(this.state.email, this.state.password);
     }
   };
   static navigationOptions = ({ navigation }) => {
@@ -82,9 +82,9 @@ class LoginSignupScreen extends React.Component<
     };
   };
   render() {
-    console.log(this.state);
     return (
       <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+        <Header></Header>
         <Form>
           <Item stackedLabel>
             <Label>E-Mail</Label>

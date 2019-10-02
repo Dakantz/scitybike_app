@@ -20,8 +20,16 @@
     "ios": {
       "supportsTablet": true
     },
+    "android": {
+      "package": "bike.scity.app",
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyAVNa2uS-FQEYqVeeocA5DkS2cP-KqW_MU"
+        }
+      }
+    },
     "extra": {
-      "api_host": "http://192.168.0.108:8080",
+      "api_host": "http://192.168.0.129:8080",
       "auth0": {
         "clientId": "3TrDRbLTdq6eTh8k2oYxDTGQLtpLpzwi",
         "domain": "scity-bike.eu.auth0.com",

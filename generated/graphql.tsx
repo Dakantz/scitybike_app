@@ -1,6 +1,6 @@
 import gql from 'graphql-tag';
-import * as ApolloReactCommon from '@apollo/react-common';
 import * as React from 'react';
+import * as ApolloReactCommon from '@apollo/react-common';
 import * as ApolloReactComponents from '@apollo/react-components';
 import * as ApolloReactHoc from '@apollo/react-hoc';
 import * as ApolloReactHooks from '@apollo/react-hooks';
@@ -45,6 +45,18 @@ export type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
             "name": "UserCreateError"
           }
         ]
+      },
+      {
+        "kind": "UNION",
+        "name": "BikeRentResult",
+        "possibleTypes": [
+          {
+            "name": "BikeRentOk"
+          },
+          {
+            "name": "BikeRentFailure"
+          }
+        ]
       }
     ]
   }
@@ -60,6 +72,37 @@ export type Scalars = {
   Float: number,
 };
 
+export type Bike = {
+   __typename?: 'Bike',
+  id: Scalars['ID'],
+  name: Scalars['String'],
+  type: Scalars['String'],
+  pin?: Maybe<Scalars['String']>,
+  location?: Maybe<GeoPoint>,
+};
+
+export type BikeRentFailure = {
+   __typename?: 'BikeRentFailure',
+  code: BikeRentFailureCode,
+  message: Scalars['String'],
+};
+
+export enum BikeRentFailureCode {
+  BikeNotAvailable = 'BIKE_NOT_AVAILABLE',
+  UserNotLoggedIn = 'USER_NOT_LOGGED_IN',
+  UserNotVerified = 'USER_NOT_VERIFIED',
+  Other = 'OTHER'
+}
+
+export type BikeRentOk = {
+   __typename?: 'BikeRentOk',
+  id: Scalars['ID'],
+  message: Scalars['String'],
+  bike: Bike,
+};
+
+export type BikeRentResult = BikeRentOk | BikeRentFailure;
+
 /** New recipe data */
 export type CreateUserInput = {
   username: Scalars['String'],
@@ -71,6 +114,13 @@ export type CreateUserInput = {
   gender?: Maybe<Gender>,
 };
 
+/** Rental End Data */
+export type EndRentBikeInput = {
+  bike_id: Scalars['Int'],
+  start_lat: Scalars['Float'],
+  start_lng: Scalars['Float'],
+};
+
 export enum Gender {
   Male = 'MALE',
   Female = 'FEMALE',
@@ -78,9 +128,22 @@ export enum Gender {
   NotSpecified = 'NOT_SPECIFIED'
 }
 
+export type GeoPoint = {
+   __typename?: 'GeoPoint',
+  lat: Scalars['Float'],
+  lng: Scalars['Float'],
+};
+
+/** Rental Transition Data */
+export type MidRentBikeInput = {
+  lat: Scalars['Float'],
+  lng: Scalars['Float'],
+};
+
 export type Mutation = {
    __typename?: 'Mutation',
   createUser: UserCreateResult,
+  rentBike: BikeRentResult,
 };
 
 
@@ -88,9 +151,22 @@ export type MutationCreateUserArgs = {
   user: CreateUserInput
 };
 
+
+export type MutationRentBikeArgs = {
+  info: StartRentBikeInput
+};
+
 export type Query = {
    __typename?: 'Query',
   me: UserResult,
+  availableBikes: Array<Bike>,
+};
+
+/** Rental Start Data */
+export type StartRentBikeInput = {
+  bike_id: Scalars['Int'],
+  start_lat: Scalars['Float'],
+  start_lng: Scalars['Float'],
 };
 
 export type User = {
@@ -116,6 +192,21 @@ export type UserFetchError = {
 };
 
 export type UserResult = User | UserFetchError;
+export type AvialableBikesQueryVariables = {};
+
+
+export type AvialableBikesQuery = (
+  { __typename?: 'Query' }
+  & { availableBikes: Array<(
+    { __typename?: 'Bike' }
+    & Pick<Bike, 'id' | 'name' | 'type'>
+    & { location: Maybe<(
+      { __typename?: 'GeoPoint' }
+      & Pick<GeoPoint, 'lat' | 'lng'>
+    )> }
+  )> }
+);
+
 export type CreateUserMutationVariables = {
   userInput: CreateUserInput
 };
@@ -146,6 +237,46 @@ export type MeQuery = (
   ) }
 );
 
+export const AvialableBikesDocument = gql`
+    query AvialableBikes {
+  availableBikes {
+    id
+    name
+    type
+    location {
+      lat
+      lng
+    }
+  }
+}
+    `;
+export type AvialableBikesComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AvialableBikesQuery, AvialableBikesQueryVariables>, 'query'>;
+
+    export const AvialableBikesComponent = (props: AvialableBikesComponentProps) => (
+      <ApolloReactComponents.Query<AvialableBikesQuery, AvialableBikesQueryVariables> query={AvialableBikesDocument} {...props} />
+    );
+    
+export type AvialableBikesProps<TChildProps = {}> = ApolloReactHoc.DataProps<AvialableBikesQuery, AvialableBikesQueryVariables> & TChildProps;
+export function withAvialableBikes<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  AvialableBikesQuery,
+  AvialableBikesQueryVariables,
+  AvialableBikesProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, AvialableBikesQuery, AvialableBikesQueryVariables, AvialableBikesProps<TChildProps>>(AvialableBikesDocument, {
+      alias: 'avialableBikes',
+      ...operationOptions
+    });
+};
+
+    export function useAvialableBikesQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<AvialableBikesQuery, AvialableBikesQueryVariables>) {
+      return ApolloReactHooks.useQuery<AvialableBikesQuery, AvialableBikesQueryVariables>(AvialableBikesDocument, baseOptions);
+    }
+      export function useAvialableBikesLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AvialableBikesQuery, AvialableBikesQueryVariables>) {
+        return ApolloReactHooks.useLazyQuery<AvialableBikesQuery, AvialableBikesQueryVariables>(AvialableBikesDocument, baseOptions);
+      }
+      
+export type AvialableBikesQueryHookResult = ReturnType<typeof useAvialableBikesQuery>;
+export type AvialableBikesQueryResult = ApolloReactCommon.QueryResult<AvialableBikesQuery, AvialableBikesQueryVariables>;
 export const CreateUserDocument = gql`
     mutation createUser($userInput: CreateUserInput!) {
   createUser(user: $userInput) {

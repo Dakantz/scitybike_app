@@ -1,6 +1,7 @@
 // NavigationService.js
 
 import { NavigationActions, NavigationParams } from "react-navigation";
+import { DrawerActions } from "react-navigation-drawer";
 
 let _navigator;
 
@@ -23,15 +24,18 @@ function navigate(
     NavigationActions.navigate({
       routeName,
       params,
-      action,
-      
+      action
     })
   );
 }
 
+function openDrawer() {
+  _navigator.dispatch(DrawerActions.openDrawer());
+}
 // add other navigation functions that you need and export them
 
 export default {
+  openDrawer,
   navigate,
   setTopLevelNavigator
 };
