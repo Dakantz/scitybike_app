@@ -75,7 +75,8 @@ export type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
 };
 
       export default result;
-    /** All built-in and custom scalars, mapped to their actual values */
+    
+/** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
   ID: string,
   String: string,
@@ -115,6 +116,12 @@ export enum BikeRentFailureCode {
   UserNotVerified = 'USER_NOT_VERIFIED',
   Other = 'OTHER'
 }
+
+/** Rental Transition Data */
+export type BikeRentMultiUpdateInput = {
+  locations: Array<LocationInput>,
+  rentalId: Scalars['Int'],
+};
 
 export type BikeRentOk = {
    __typename?: 'BikeRentOk',
@@ -169,6 +176,12 @@ export type GeoPoint = {
   lng: Scalars['Float'],
 };
 
+/** Rental Transition Data */
+export type LocationInput = {
+  lat: Scalars['Float'],
+  lng: Scalars['Float'],
+};
+
 export type Mutation = {
    __typename?: 'Mutation',
   createUser: UserCreateResult,
@@ -189,7 +202,7 @@ export type MutationRentBikeArgs = {
 
 
 export type MutationUpdateBikeRentalArgs = {
-  info: BikeRentUpdateInput
+  info: BikeRentMultiUpdateInput
 };
 
 
@@ -239,6 +252,7 @@ export type UserFetchError = {
 };
 
 export type UserResult = User | UserFetchError;
+
 export type AvialableBikesQueryVariables = {};
 
 
@@ -274,12 +288,12 @@ export type RentBikeMutation = (
   ) }
 );
 
-export type UpdateBikeMutationVariables = {
-  updateData: BikeRentUpdateInput
+export type UpdateRentalMutationVariables = {
+  info: BikeRentMultiUpdateInput
 };
 
 
-export type UpdateBikeMutation = (
+export type UpdateRentalMutation = (
   { __typename?: 'Mutation' }
   & { updateBikeRental: (
     { __typename?: 'BikeUpdateFailure' }
@@ -289,7 +303,7 @@ export type UpdateBikeMutation = (
     & Pick<BikeUpdateOk, 'message'>
     & { bike: (
       { __typename?: 'Bike' }
-      & Pick<Bike, 'id'>
+      & Pick<Bike, 'id' | 'name' | 'type' | 'pin'>
     ) }
   ) }
 );
@@ -364,6 +378,7 @@ export type MeQuery = (
   ) }
 );
 
+
 export const AvialableBikesDocument = gql`
     query AvialableBikes {
   availableBikes {
@@ -395,14 +410,29 @@ export function withAvialableBikes<TProps, TChildProps = {}>(operationOptions?: 
     });
 };
 
-    export function useAvialableBikesQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<AvialableBikesQuery, AvialableBikesQueryVariables>) {
-      return ApolloReactHooks.useQuery<AvialableBikesQuery, AvialableBikesQueryVariables>(AvialableBikesDocument, baseOptions);
-    }
-      export function useAvialableBikesLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AvialableBikesQuery, AvialableBikesQueryVariables>) {
-        return ApolloReactHooks.useLazyQuery<AvialableBikesQuery, AvialableBikesQueryVariables>(AvialableBikesDocument, baseOptions);
+/**
+ * __useAvialableBikesQuery__
+ *
+ * To run a query within a React component, call `useAvialableBikesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAvialableBikesQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAvialableBikesQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useAvialableBikesQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<AvialableBikesQuery, AvialableBikesQueryVariables>) {
+        return ApolloReactHooks.useQuery<AvialableBikesQuery, AvialableBikesQueryVariables>(AvialableBikesDocument, baseOptions);
       }
-      
+export function useAvialableBikesLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AvialableBikesQuery, AvialableBikesQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<AvialableBikesQuery, AvialableBikesQueryVariables>(AvialableBikesDocument, baseOptions);
+        }
 export type AvialableBikesQueryHookResult = ReturnType<typeof useAvialableBikesQuery>;
+export type AvialableBikesLazyQueryHookResult = ReturnType<typeof useAvialableBikesLazyQuery>;
 export type AvialableBikesQueryResult = ApolloReactCommon.QueryResult<AvialableBikesQuery, AvialableBikesQueryVariables>;
 export const RentBikeDocument = gql`
     mutation RentBike($rentalInfo: StartRentBikeInput!) {
@@ -443,15 +473,32 @@ export function withRentBike<TProps, TChildProps = {}>(operationOptions?: Apollo
     });
 };
 
-    export function useRentBikeMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<RentBikeMutation, RentBikeMutationVariables>) {
-      return ApolloReactHooks.useMutation<RentBikeMutation, RentBikeMutationVariables>(RentBikeDocument, baseOptions);
-    }
+/**
+ * __useRentBikeMutation__
+ *
+ * To run a mutation, you first call `useRentBikeMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useRentBikeMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [rentBikeMutation, { data, loading, error }] = useRentBikeMutation({
+ *   variables: {
+ *      rentalInfo: // value for 'rentalInfo'
+ *   },
+ * });
+ */
+export function useRentBikeMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<RentBikeMutation, RentBikeMutationVariables>) {
+        return ApolloReactHooks.useMutation<RentBikeMutation, RentBikeMutationVariables>(RentBikeDocument, baseOptions);
+      }
 export type RentBikeMutationHookResult = ReturnType<typeof useRentBikeMutation>;
 export type RentBikeMutationResult = ApolloReactCommon.MutationResult<RentBikeMutation>;
 export type RentBikeMutationOptions = ApolloReactCommon.BaseMutationOptions<RentBikeMutation, RentBikeMutationVariables>;
-export const UpdateBikeDocument = gql`
-    mutation UpdateBike($updateData: BikeRentUpdateInput!) {
-  updateBikeRental(info: $updateData) {
+export const UpdateRentalDocument = gql`
+    mutation UpdateRental($info: BikeRentMultiUpdateInput!) {
+  updateBikeRental(info: $info) {
     ... on BikeUpdateFailure {
       message
     }
@@ -459,36 +506,56 @@ export const UpdateBikeDocument = gql`
       message
       bike {
         id
+        name
+        type
+        pin
       }
     }
   }
 }
     `;
-export type UpdateBikeMutationFn = ApolloReactCommon.MutationFunction<UpdateBikeMutation, UpdateBikeMutationVariables>;
-export type UpdateBikeComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<UpdateBikeMutation, UpdateBikeMutationVariables>, 'mutation'>;
+export type UpdateRentalMutationFn = ApolloReactCommon.MutationFunction<UpdateRentalMutation, UpdateRentalMutationVariables>;
+export type UpdateRentalComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<UpdateRentalMutation, UpdateRentalMutationVariables>, 'mutation'>;
 
-    export const UpdateBikeComponent = (props: UpdateBikeComponentProps) => (
-      <ApolloReactComponents.Mutation<UpdateBikeMutation, UpdateBikeMutationVariables> mutation={UpdateBikeDocument} {...props} />
+    export const UpdateRentalComponent = (props: UpdateRentalComponentProps) => (
+      <ApolloReactComponents.Mutation<UpdateRentalMutation, UpdateRentalMutationVariables> mutation={UpdateRentalDocument} {...props} />
     );
     
-export type UpdateBikeProps<TChildProps = {}> = ApolloReactHoc.MutateProps<UpdateBikeMutation, UpdateBikeMutationVariables> & TChildProps;
-export function withUpdateBike<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+export type UpdateRentalProps<TChildProps = {}> = ApolloReactHoc.MutateProps<UpdateRentalMutation, UpdateRentalMutationVariables> & TChildProps;
+export function withUpdateRental<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
   TProps,
-  UpdateBikeMutation,
-  UpdateBikeMutationVariables,
-  UpdateBikeProps<TChildProps>>) {
-    return ApolloReactHoc.withMutation<TProps, UpdateBikeMutation, UpdateBikeMutationVariables, UpdateBikeProps<TChildProps>>(UpdateBikeDocument, {
-      alias: 'updateBike',
+  UpdateRentalMutation,
+  UpdateRentalMutationVariables,
+  UpdateRentalProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, UpdateRentalMutation, UpdateRentalMutationVariables, UpdateRentalProps<TChildProps>>(UpdateRentalDocument, {
+      alias: 'updateRental',
       ...operationOptions
     });
 };
 
-    export function useUpdateBikeMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<UpdateBikeMutation, UpdateBikeMutationVariables>) {
-      return ApolloReactHooks.useMutation<UpdateBikeMutation, UpdateBikeMutationVariables>(UpdateBikeDocument, baseOptions);
-    }
-export type UpdateBikeMutationHookResult = ReturnType<typeof useUpdateBikeMutation>;
-export type UpdateBikeMutationResult = ApolloReactCommon.MutationResult<UpdateBikeMutation>;
-export type UpdateBikeMutationOptions = ApolloReactCommon.BaseMutationOptions<UpdateBikeMutation, UpdateBikeMutationVariables>;
+/**
+ * __useUpdateRentalMutation__
+ *
+ * To run a mutation, you first call `useUpdateRentalMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateRentalMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateRentalMutation, { data, loading, error }] = useUpdateRentalMutation({
+ *   variables: {
+ *      info: // value for 'info'
+ *   },
+ * });
+ */
+export function useUpdateRentalMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<UpdateRentalMutation, UpdateRentalMutationVariables>) {
+        return ApolloReactHooks.useMutation<UpdateRentalMutation, UpdateRentalMutationVariables>(UpdateRentalDocument, baseOptions);
+      }
+export type UpdateRentalMutationHookResult = ReturnType<typeof useUpdateRentalMutation>;
+export type UpdateRentalMutationResult = ApolloReactCommon.MutationResult<UpdateRentalMutation>;
+export type UpdateRentalMutationOptions = ApolloReactCommon.BaseMutationOptions<UpdateRentalMutation, UpdateRentalMutationVariables>;
 export const MyRentalsDocument = gql`
     query MyRentals($showAll: Boolean!) {
   rentals(showAll: $showAll) {
@@ -527,14 +594,30 @@ export function withMyRentals<TProps, TChildProps = {}>(operationOptions?: Apoll
     });
 };
 
-    export function useMyRentalsQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<MyRentalsQuery, MyRentalsQueryVariables>) {
-      return ApolloReactHooks.useQuery<MyRentalsQuery, MyRentalsQueryVariables>(MyRentalsDocument, baseOptions);
-    }
-      export function useMyRentalsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<MyRentalsQuery, MyRentalsQueryVariables>) {
-        return ApolloReactHooks.useLazyQuery<MyRentalsQuery, MyRentalsQueryVariables>(MyRentalsDocument, baseOptions);
+/**
+ * __useMyRentalsQuery__
+ *
+ * To run a query within a React component, call `useMyRentalsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useMyRentalsQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useMyRentalsQuery({
+ *   variables: {
+ *      showAll: // value for 'showAll'
+ *   },
+ * });
+ */
+export function useMyRentalsQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<MyRentalsQuery, MyRentalsQueryVariables>) {
+        return ApolloReactHooks.useQuery<MyRentalsQuery, MyRentalsQueryVariables>(MyRentalsDocument, baseOptions);
       }
-      
+export function useMyRentalsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<MyRentalsQuery, MyRentalsQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<MyRentalsQuery, MyRentalsQueryVariables>(MyRentalsDocument, baseOptions);
+        }
 export type MyRentalsQueryHookResult = ReturnType<typeof useMyRentalsQuery>;
+export type MyRentalsLazyQueryHookResult = ReturnType<typeof useMyRentalsLazyQuery>;
 export type MyRentalsQueryResult = ApolloReactCommon.QueryResult<MyRentalsQuery, MyRentalsQueryVariables>;
 export const ReturnBikeDocument = gql`
     mutation ReturnBike($endInfo: BikeRentUpdateInput!) {
@@ -570,9 +653,26 @@ export function withReturnBike<TProps, TChildProps = {}>(operationOptions?: Apol
     });
 };
 
-    export function useReturnBikeMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<ReturnBikeMutation, ReturnBikeMutationVariables>) {
-      return ApolloReactHooks.useMutation<ReturnBikeMutation, ReturnBikeMutationVariables>(ReturnBikeDocument, baseOptions);
-    }
+/**
+ * __useReturnBikeMutation__
+ *
+ * To run a mutation, you first call `useReturnBikeMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useReturnBikeMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [returnBikeMutation, { data, loading, error }] = useReturnBikeMutation({
+ *   variables: {
+ *      endInfo: // value for 'endInfo'
+ *   },
+ * });
+ */
+export function useReturnBikeMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<ReturnBikeMutation, ReturnBikeMutationVariables>) {
+        return ApolloReactHooks.useMutation<ReturnBikeMutation, ReturnBikeMutationVariables>(ReturnBikeDocument, baseOptions);
+      }
 export type ReturnBikeMutationHookResult = ReturnType<typeof useReturnBikeMutation>;
 export type ReturnBikeMutationResult = ApolloReactCommon.MutationResult<ReturnBikeMutation>;
 export type ReturnBikeMutationOptions = ApolloReactCommon.BaseMutationOptions<ReturnBikeMutation, ReturnBikeMutationVariables>;
@@ -610,9 +710,26 @@ export function withCreateUser<TProps, TChildProps = {}>(operationOptions?: Apol
     });
 };
 
-    export function useCreateUserMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<CreateUserMutation, CreateUserMutationVariables>) {
-      return ApolloReactHooks.useMutation<CreateUserMutation, CreateUserMutationVariables>(CreateUserDocument, baseOptions);
-    }
+/**
+ * __useCreateUserMutation__
+ *
+ * To run a mutation, you first call `useCreateUserMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateUserMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createUserMutation, { data, loading, error }] = useCreateUserMutation({
+ *   variables: {
+ *      userInput: // value for 'userInput'
+ *   },
+ * });
+ */
+export function useCreateUserMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<CreateUserMutation, CreateUserMutationVariables>) {
+        return ApolloReactHooks.useMutation<CreateUserMutation, CreateUserMutationVariables>(CreateUserDocument, baseOptions);
+      }
 export type CreateUserMutationHookResult = ReturnType<typeof useCreateUserMutation>;
 export type CreateUserMutationResult = ApolloReactCommon.MutationResult<CreateUserMutation>;
 export type CreateUserMutationOptions = ApolloReactCommon.BaseMutationOptions<CreateUserMutation, CreateUserMutationVariables>;
@@ -650,12 +767,27 @@ export function withMe<TProps, TChildProps = {}>(operationOptions?: ApolloReactH
     });
 };
 
-    export function useMeQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<MeQuery, MeQueryVariables>) {
-      return ApolloReactHooks.useQuery<MeQuery, MeQueryVariables>(MeDocument, baseOptions);
-    }
-      export function useMeLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<MeQuery, MeQueryVariables>) {
-        return ApolloReactHooks.useLazyQuery<MeQuery, MeQueryVariables>(MeDocument, baseOptions);
+/**
+ * __useMeQuery__
+ *
+ * To run a query within a React component, call `useMeQuery` and pass it any options that fit your needs.
+ * When your component renders, `useMeQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useMeQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useMeQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<MeQuery, MeQueryVariables>) {
+        return ApolloReactHooks.useQuery<MeQuery, MeQueryVariables>(MeDocument, baseOptions);
       }
-      
+export function useMeLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<MeQuery, MeQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<MeQuery, MeQueryVariables>(MeDocument, baseOptions);
+        }
 export type MeQueryHookResult = ReturnType<typeof useMeQuery>;
+export type MeLazyQueryHookResult = ReturnType<typeof useMeLazyQuery>;
 export type MeQueryResult = ApolloReactCommon.QueryResult<MeQuery, MeQueryVariables>;

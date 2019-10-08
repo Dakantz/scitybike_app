@@ -16,6 +16,7 @@ import { ApolloProvider as ApolloHooksProvider } from "react-apollo-hooks";
 import { apolloClient } from "./helpers";
 import UserScreen from "./components/UserScreen";
 import RentBikeScreen from "./components/RentBikeScreen";
+import PermissionScreen from "./components/PermissionScreen";
 class AppState {
   isReady = false;
 }
@@ -55,6 +56,7 @@ const AuthenticationNavigator = createSwitchNavigator(
   {
     Signin: LoginSignupScreen,
     Startup: Startupscreen,
+    Permissions: PermissionScreen,
     Home: AppNavigator
     //TODO ForgotPassword: ForgotPasswordScreen,
   },

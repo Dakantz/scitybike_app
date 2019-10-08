@@ -16,7 +16,8 @@ import {
   Body,
   Right,
   View,
-  Icon
+  Icon,
+  Spinner
 } from "native-base";
 import { StoreProps, connection } from "../store";
 import { NavigationInjectedProps } from "react-navigation";
@@ -126,6 +127,8 @@ class LoginSignupScreen extends React.Component<
               autoCapitalize="none"
             />
           </Item>
+          {this.props.user.signingUp ||
+            (this.props.user.loggingIn && <Spinner color="blue" />)}
           <Grid>
             <Col style={{ height: 100 }}>
               <Button primary onPress={this.submit}>

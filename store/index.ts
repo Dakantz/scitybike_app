@@ -8,11 +8,15 @@ import {
   relogin as reloginD,
   createUser as createUserD,
   login as loginD,
-  logOut as logOutD
+  logOut as logOutD,
+  requestPermissions as reqPerm
 } from "./user/types";
-import { NavigationProp, NavigationParams, NavigationContainerProps } from "react-navigation";
+import { rentBike as rentBikeD } from "./bike/types";
+import { NavigationContainerProps } from "react-navigation";
+import { bikeReducer } from "./bike";
 const rootReducer = combineReducers({
-  user: userReducer
+  user: userReducer,
+  bike: bikeReducer
 });
 
 export function configureStore() {
@@ -31,7 +35,9 @@ class AllDispatch {
     public relogin = reloginD,
     public login = loginD,
     public createUser = createUserD,
-    public logOut= logOutD
+    public logOut = logOutD,
+    public requestPermission = reqPerm,
+    public rentBike = rentBikeD
   ) {}
 }
 const allDispatchers = new AllDispatch();

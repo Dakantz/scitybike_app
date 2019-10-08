@@ -25,17 +25,27 @@ const fragmentMatcher = new IntrospectionFragmentMatcher({
 const cache = new InMemoryCache({
   fragmentMatcher
 });
+let headers: any = {};
 let apolloClient = new ApolloClient({
   uri: Constants.manifest.extra.api_host,
-  cache
-});
-let headers: any = {};
-apolloClient.link = new HttpLink({
+  cache,
   headers
 });
 function setToken(token: string) {
   console.log("Set token to:", token);
-  headers.Authorization = `Bearer ${token}`;
+  headers.authorization = `Bearer ${token}`;
+}
+
+async function askForLocationPermission() {
+  console.log("Asking 4 location permission:");
 }
 let auth0 = new Auth0Info();
-export { apolloClient, setToken, auth0 };
+async function asyncForeach<T>(
+  arr: T[],
+  callback: (element: T, idx?: number, array?: T[]) => Promise<any>
+) {
+  for (var i = 0; i < arr.length; i++) {
+    await callback(arr[i], i, arr);
+  }
+}
+export { apolloClient, setToken, auth0,asyncForeach };

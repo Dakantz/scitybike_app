@@ -6,6 +6,8 @@ import * as SecureStore from "expo-secure-store";
 import { AnyAction } from "redux";
 import jwt_decode from "jwt-decode";
 import { NavigationActions } from "react-navigation";
+import * as Permissions from "expo-permissions";
+import * as Location from "expo-location";
 import {
   CreateUserDocument,
   UserCreateResult,
@@ -18,6 +20,13 @@ import {
   MeQuery
 } from "../../generated/graphql";
 import NavigationService from "../../NavigationService";
+
+export enum PermissionStates {
+  NONE,
+  REQUESTED,
+  GRANTED,
+  DENIED
+}
 export class UserState {
   loggedIn: boolean = false;
   loggingIn: boolean = false;
@@ -32,6 +41,7 @@ export class UserState {
   first_name: string;
   last_name: string;
   client: ApolloClient<unknown>;
+  permissionState = PermissionStates.NONE;
   constructor() {
     this.client = apolloClient;
   }
@@ -67,6 +77,25 @@ export const setTokenState = function(
     }
   };
 };
+export const doneLogin = function(): ThunkAction<
+  Promise<void>,
+  {},
+  {},
+  AnyAction
+> {
+  return async (dispatch: ThunkDispatch<{}, {}, AnyAction>): Promise<void> => {
+    try {
+      let permission = await Permissions.getAsync(Permissions.LOCATION);
+      if (permission.status !== "granted") {
+        NavigationService.navigate("Permissions");
+      } else {
+        NavigationService.navigate("Map");
+      }
+    } catch (e) {
+      console.log("Error going to next screen:", e);
+    }
+  };
+};
 export const loginAuth0 = function(
   email: string,
   password: string
@@ -95,8 +124,7 @@ export const loginAuth0 = function(
           signupFailed: false
         })
       );
-
-      NavigationService.navigate("Map");
+      dispatch(doneLogin());
     } catch (e) {
       console.log("Error Logging into Auth0", e);
 
@@ -234,13 +262,11 @@ export const relogin = function(): ThunkAction<
       dispatch(setProps({ loggingIn: true }));
       let token = await SecureStore.getItemAsync("token");
 
-      console.log("Saved token:", token);
       if (token) {
         setToken(token);
         let fetchResult = await apolloClient.query<MeQuery>({
           query: MeDocument
         });
-        console.log(fetchResult);
         if (fetchResult.data.me.__typename == "User") {
           dispatch(setTokenState(token));
           dispatch(
@@ -248,6 +274,7 @@ export const relogin = function(): ThunkAction<
               loggedIn: true
             })
           );
+          dispatch(doneLogin());
         } else {
           let email = await SecureStore.getItemAsync("email");
           let password = await SecureStore.getItemAsync("password");
@@ -272,6 +299,27 @@ export const relogin = function(): ThunkAction<
         })
       );
       console.error("Error loggin in!", e);
+    }
+  };
+};
+
+export const requestPermissions = function(): ThunkAction<
+  Promise<void>,
+  {},
+  {},
+  AnyAction
+> {
+  return async (dispatch: ThunkDispatch<{}, {}, AnyAction>): Promise<void> => {
+    try {
+      await Location.requestPermissionsAsync();
+      setProps({ permissionState: PermissionStates.GRANTED });
+
+      NavigationService.navigate("Map");
+    } catch (e) {
+      setProps({ permissionState: PermissionStates.DENIED });
+      console.log(
+        "User denied, permissions, just leave him hanging hahahahhaha "
+      );
     }
   };
 };

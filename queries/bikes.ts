@@ -32,19 +32,23 @@ export const RENT_BIKE = gql`mutation RentBike($rentalInfo:StartRentBikeInput!){
   }
   `;
 export const UPDATE_RENTAL = gql`
-  mutation UpdateBike($updateData: BikeRentUpdateInput!) {
-    updateBikeRental(info: $updateData) {
-      ... on BikeUpdateFailure {
-        message
-      }
-      ... on BikeUpdateOk {
-        message
-        bike {
-          id
-        }
+mutation UpdateRental($info: BikeRentMultiUpdateInput!) {
+  updateBikeRental(info: $info) {
+    ... on BikeUpdateFailure {
+      message
+    }
+    ... on BikeUpdateOk {
+      message
+      bike {
+        id
+        name
+        type
+        pin
       }
     }
   }
+}
+
 `;
 export const MY_RENTALS = gql`
   query MyRentals($showAll: Boolean!) {

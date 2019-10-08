@@ -1,14 +1,14 @@
-import { UserActionDefs, UserActions, UserState } from "./types";
+import { BikeActionDefs, BikeActions, BikesState } from "./types";
 import { setToken } from "../../helpers";
 
-const initialState = new UserState();
+const initialState = new BikesState();
 
-export function userReducer(
+export function bikeReducer(
   state = initialState,
-  action: UserActionDefs
-): UserState {
+  action: BikeActionDefs
+): BikesState {
   switch (action.type) {
-    case UserActions.SET_PROPS: {
+    case BikeActions.SET_PROPS: {
       return { ...state, ...action.props };
     }
     default:

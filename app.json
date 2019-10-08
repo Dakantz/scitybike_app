@@ -29,7 +29,7 @@
       }
     },
     "extra": {
-      "api_host": "http://192.168.0.129:8080",
+      "api_host": "http://192.168.0.52:8080",
       "auth0": {
         "clientId": "3TrDRbLTdq6eTh8k2oYxDTGQLtpLpzwi",
         "domain": "scity-bike.eu.auth0.com",

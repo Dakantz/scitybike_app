@@ -7,7 +7,8 @@ import {
   View,
   Image,
   Button,
-  Icon
+  Icon,
+  Spinner
 } from "native-base";
 import { StoreProps, connection } from "../store";
 import MapView, { PROVIDER_GOOGLE } from "react-native-maps";
@@ -18,6 +19,7 @@ import {
 } from "../generated/graphql";
 import BikeMarkers from "./sub-components/bike-markers";
 import NavigationService from "../NavigationService";
+import { RentState } from "../store/bike/types";
 class RentBikeScreenState {}
 
 class RentBikeScree extends React.Component<StoreProps, RentBikeScreenState> {
@@ -28,6 +30,7 @@ class RentBikeScree extends React.Component<StoreProps, RentBikeScreenState> {
   static navigationOptions = {
     headerTitle: "Rent..."
   };
+  rentBike() {}
   render() {
     let navigation = this.props.navigation;
     let bike: Bike = {
@@ -44,10 +47,29 @@ class RentBikeScree extends React.Component<StoreProps, RentBikeScreenState> {
         }}
       >
         <Text>Rent bike: {bike.name}</Text>
-        <Text>Type: {bike.type}</Text>{" "}
-        <Button onPress={this.props.logOut}>
+        <Text>Type: {bike.type}</Text>
+        <Button onPress={() => this.props.rentBike(parseInt(bike.id))}>
           <Text>🚲 Rent me!</Text>
         </Button>
+        {this.props.bike.rentState == RentState.LOADING && (
+          <Spinner color="blue"></Spinner>
+        )}
+        {this.props.bike.rentState == RentState.ERROR && (
+          <Text
+            style={{
+              color: "darkred"
+            }}
+          >
+            {this.props.bike.lastError}
+          </Text>
+        )}
+        {this.props.bike.rentState == RentState.SUCCESS && (
+          <Text
+          >
+            Successful!
+            Your 
+          </Text>
+        )}
       </View>
     );
   }
