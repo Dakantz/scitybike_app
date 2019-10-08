@@ -17,6 +17,7 @@ import { apolloClient } from "./helpers";
 import UserScreen from "./components/UserScreen";
 import RentBikeScreen from "./components/RentBikeScreen";
 import PermissionScreen from "./components/PermissionScreen";
+import RentalsScreen from "./components/RentalsScreen";
 class AppState {
   isReady = false;
 }
@@ -30,6 +31,14 @@ const MapStack = createStackNavigator(
   }
 );
 
+const RentalStack = createStackNavigator(
+  {
+    Main: RentalsScreen
+  },
+  {
+    initialRouteName: "Main"
+  }
+);
 const UserStack = createStackNavigator(
     {
       Main: UserScreen
@@ -45,7 +54,8 @@ const AppNavigator = createDrawerNavigator(
      * AuthenticationNavigator is a screen component
      */
     Map: MapStack,
-    User: UserStack
+    User: UserStack,
+    Rentals: RentalStack
   },
   {
     initialRouteName: "Map",

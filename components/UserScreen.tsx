@@ -39,17 +39,16 @@ class UserScreen extends React.Component<StoreProps, UserScreenState> {
     )
   };
   render() {
-    console.log("User:", this.props.user);
     return (
       <View
         style={{
           flex: 1,
-          alignItems: "center",
+          alignItems: "stretch",
           justifyContent: "center",
           width: "100%"
         }}
       >
-        <Card>
+        <Card style={{height:"100%"}}>
           <CardItem header bordered>
             <Text>You are logged in as: {this.props.user.username}</Text>
           </CardItem>

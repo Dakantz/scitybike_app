@@ -4,7 +4,8 @@ import {
   LocationInput,
   UpdateRentalMutation,
   UpdateRentalMutationVariables,
-  RentBikeDocument
+  RentBikeDocument,
+  UpdateRentalDocument
 } from "../generated/graphql";
 const BIKE_TASK_NAME = "bike_location_update";
 import * as Location from "expo-location";
@@ -33,7 +34,7 @@ export class BikeUpdater {
           UpdateRentalMutation,
           UpdateRentalMutationVariables
         >({
-          mutation: RentBikeDocument,
+          mutation: UpdateRentalDocument,
           variables: {
             info: {
               locations: input_loc,
@@ -43,7 +44,10 @@ export class BikeUpdater {
         });
         switch (result.data.updateBikeRental.__typename) {
           case "BikeUpdateFailure":
-            console.log("Failed to update bike, will be done on next update");
+            console.log(
+              "Failed to update bike, will be done on next update, reason " +
+                result.data.updateBikeRental.message
+            );
             break;
           case "BikeUpdateOk":
             console.log("Bike Update succeeded", rental);
@@ -58,11 +62,14 @@ export class BikeUpdater {
       console.log("Received new locations", locations);
     });
   }
-  async addBikeToWatch(...bikes: number[]) {
-    this.watchedRentals.push(...bikes);
+  async addBikeToWatch(...rentals: number[]) {
+    rentals.forEach(r => {
+      if (!this.watchedRentals.find(n => n == r)) this.watchedRentals.push(r);
+    });
     if (!this.startedLocationWatch) {
       await Location.startLocationUpdatesAsync(BIKE_TASK_NAME, {
         activityType: Location.ActivityType.OtherNavigation,
+        accuracy: Location.Accuracy.Balanced,
         foregroundService: {
           notificationTitle: "Scity Bikes location tracking",
           notificationBody:
@@ -72,15 +79,16 @@ export class BikeUpdater {
       this.startedLocationWatch = true;
     }
   }
-  async removeBikeToWatch(...bikes: number[]) {
-    bikes.forEach(bike => {
+  async removeBikeToWatch(...rentals: number[]) {
+    rentals.forEach(bike => {
       this.watchedRentals.splice(
         this.watchedRentals.findIndex(bikeWatched => bike == bikeWatched),
         1
       );
     });
-    if (this.watchedRentals.length == 0) {
+    if (this.watchedRentals.length == 0 && this.startedLocationWatch) {
       await Location.stopLocationUpdatesAsync(BIKE_TASK_NAME);
+      this.startedLocationWatch = false;
     }
   }
 }

@@ -38,6 +38,9 @@ class RentBikeScree extends React.Component<StoreProps, RentBikeScreenState> {
       name: navigation.getParam("name"),
       type: navigation.getParam("type")
     };
+    let rentedBike = this.props.bike.rentedBikes.find(
+      r => r.bike.id == bike.id
+    );
     return (
       <View
         style={{
@@ -64,10 +67,8 @@ class RentBikeScree extends React.Component<StoreProps, RentBikeScreenState> {
           </Text>
         )}
         {this.props.bike.rentState == RentState.SUCCESS && (
-          <Text
-          >
-            Successful!
-            Your 
+          <Text>
+            Successful! Your PIN is: {rentedBike && rentedBike.bike.pin}
           </Text>
         )}
       </View>

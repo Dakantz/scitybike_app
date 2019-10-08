@@ -11,7 +11,12 @@ import {
   logOut as logOutD,
   requestPermissions as reqPerm
 } from "./user/types";
-import { rentBike as rentBikeD } from "./bike/types";
+import {
+  rentBike as rentBikeD,
+  fetchOpenRentals as fetchOpenRentalsD,
+  returnBike as returnBikeD,
+  fetchAllRentals as fetchAllRentalsD
+} from "./bike/types";
 import { NavigationContainerProps } from "react-navigation";
 import { bikeReducer } from "./bike";
 const rootReducer = combineReducers({
@@ -37,7 +42,10 @@ class AllDispatch {
     public createUser = createUserD,
     public logOut = logOutD,
     public requestPermission = reqPerm,
-    public rentBike = rentBikeD
+    public rentBike = rentBikeD,
+    public fetchOpenRentals = fetchOpenRentalsD,
+    public returnBike = returnBikeD,
+    public fetchAllRentals = fetchAllRentalsD
   ) {}
 }
 const allDispatchers = new AllDispatch();

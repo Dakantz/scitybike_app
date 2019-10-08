@@ -23,6 +23,9 @@ class MapScreen extends React.Component<StoreProps, MapScreenState> {
     super(props);
     this.state = new MapScreenState();
   }
+  componentDidMount() {
+    this.props.fetchOpenRentals();
+  }
   static navigationOptions = {
     headerTitle: "Scity Bikes",
     headerLeft: (
