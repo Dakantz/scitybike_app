@@ -9,7 +9,9 @@ import {
   Icon,
   CardItem,
   Body,
-  Card
+  Card,
+  Grid,
+  Row
 } from "native-base";
 import { StoreProps, connection } from "../store";
 import MapView, { PROVIDER_GOOGLE } from "react-native-maps";
@@ -44,25 +46,37 @@ class UserScreen extends React.Component<StoreProps, UserScreenState> {
         style={{
           flex: 1,
           alignItems: "stretch",
-          justifyContent: "center",
+          justifyContent: "flex-start",
           width: "100%"
         }}
       >
-        <Card style={{height:"100%"}}>
+        <Card>
           <CardItem header bordered>
             <Text>You are logged in as: {this.props.user.username}</Text>
           </CardItem>
-          <CardItem bordered>
-            <Body>
-              <Text>
-                Full name: {this.props.user.first_name}{" "}
-                {this.props.user.last_name}
-              </Text>
-              <Button iconLeft light onPress={this.props.logOut}>
-                <Icon name="log-out" />
-                <Text>Log Out</Text>
-              </Button>
-            </Body>
+          <CardItem>
+            <Text>
+              Full name: {this.props.user.first_name}{" "}
+              {this.props.user.last_name}
+            </Text>
+          </CardItem>
+          <CardItem>
+            <Text>
+              E-Mail: {this.props.user.email}{" "}
+              {this.props.user.email_verified ? (
+                <Icon name="checkmark"></Icon>
+              ) : (
+                <Text style={{ color: "darkred" }}>
+                  Please check your email!
+                </Text>
+              )}
+            </Text>
+          </CardItem>
+          <CardItem>
+            <Button iconLeft light onPress={this.props.logOut}>
+              <Icon name="log-out" />
+              <Text>Log Out</Text>
+            </Button>
           </CardItem>
           <CardItem footer bordered>
             <Text></Text>

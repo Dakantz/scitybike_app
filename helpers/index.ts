@@ -36,9 +36,9 @@ function setToken(token: string) {
   headers.authorization = `Bearer ${token}`;
 }
 
-async function askForLocationPermission() {
-  console.log("Asking 4 location permission:");
-}
+// async function askForLocationPermission() {
+//   console.log("Asking 4 location permission:");
+// }
 let auth0 = new Auth0Info();
 async function asyncForeach<T>(
   arr: T[],

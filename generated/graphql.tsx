@@ -240,9 +240,15 @@ export type User = {
 
 export type UserCreateError = {
    __typename?: 'UserCreateError',
-  code?: Maybe<Scalars['String']>,
+  code: UserCreateErrorCodes,
   error: Scalars['String'],
 };
+
+export enum UserCreateErrorCodes {
+  Other = 'OTHER',
+  PasswordToWeak = 'PASSWORD_TO_WEAK',
+  UserExists = 'USER_EXISTS'
+}
 
 export type UserCreateResult = User | UserCreateError;
 

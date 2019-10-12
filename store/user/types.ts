@@ -17,7 +17,9 @@ import {
   MeDocument,
   UserResult,
   CreateUserMutation,
-  MeQuery
+  MeQuery,
+  CreateUserMutationVariables,
+  UserCreateErrorCodes
 } from "../../generated/graphql";
 import NavigationService from "../../NavigationService";
 
@@ -131,8 +133,7 @@ export const loginAuth0 = function(
       NavigationService.navigate("Signin");
       dispatch(
         setProps({
-          lastError: "Error logging in, wrong password/username!",
-          loggedIn: false
+          lastError: "Error logging in, wrong password/username!"
         })
       );
     }
@@ -184,7 +185,7 @@ export const createUser = function(
       console.log(CreateUserDocument);
       let createResult = await apolloClient.mutate<
         CreateUserMutation,
-        { userInput: CreateUserInput }
+        CreateUserMutationVariables
       >({
         mutation: CreateUserDocument,
         variables: {
@@ -198,28 +199,52 @@ export const createUser = function(
         }
       });
 
-      console.log("BAckend resp:", createResult.data);
-      if (createResult.data.createUser.__typename == "UserCreateError") {
-        throw new Error(
-          "Error on Scity.Bike Backend: " +
-            (createResult.data.createUser as UserCreateError).error
-        );
-      } else {
-        console.log("Created user in backend, now Loggin in..");
-        let fetched_user = createResult.data.createUser as User;
+      console.log("Backend resp:", createResult.data);
+      switch (createResult.data.createUser.__typename) {
+        case "User":
+          let fetched_user = createResult.data.createUser as User;
 
-        dispatch(loginAuth0(email, password));
+          dispatch(loginAuth0(email, password));
+          break;
+        case "UserCreateError":
+          let readableError = "Unknown error";
+          switch (createResult.data.createUser.code) {
+            case UserCreateErrorCodes.PasswordToWeak:
+              readableError =
+                "Password too weak- please enter a passowrd containing lower case, upper case and numbers with at least 8 characters!";
+              break;
+
+            case UserCreateErrorCodes.UserExists:
+              readableError =
+                "The user you are trying to create exists already!";
+              break;
+            case UserCreateErrorCodes.Other:
+              readableError =
+                "There was an error in the backend: " +
+                createResult.data.createUser.error;
+              break;
+          }
+          dispatch(
+            setProps({
+              signingUp: false,
+              signupFailed: true,
+              lastError: readableError
+            })
+          );
+          break;
       }
     } catch (e) {
       dispatch(
         setProps({
           signingUp: false,
           signupFailed: true,
-          lastError: "Failed to Login, reason: " + e.message
+          lastError: "Failed to register, reason: " + e.message
         })
       );
       console.log("Error creating user: ", e);
     }
+
+    dispatch(setProps({ signingUp: false }));
   };
 };
 
@@ -235,9 +260,10 @@ export const logOut = function(): ThunkAction<
       await SecureStore.deleteItemAsync("username");
       await SecureStore.deleteItemAsync("password");
       await SecureStore.deleteItemAsync("token");
-      dispatch(setProps({ loggingIn: false }));
+      dispatch(setProps({ signingUp: false }));
+      NavigationService.navigate("Signin");
     } catch (e) {
-      NavigationService.navigate("Sigin");
+      console.error("Error logging out!", e);
       dispatch(
         setProps({
           loggedIn: false,
@@ -245,9 +271,9 @@ export const logOut = function(): ThunkAction<
           lastError: "Failed to Log Out, reason: " + e.message
         })
       );
-      console.error("Error loggin in!", e);
     }
-    NavigationService.navigate("Sigin");
+
+    console.log("Logged Out!");
   };
 };
 export const relogin = function(): ThunkAction<
@@ -300,6 +326,13 @@ export const relogin = function(): ThunkAction<
       );
       console.error("Error loggin in!", e);
     }
+
+    dispatch(
+      setProps({
+        loggedIn: false,
+        loggingIn: false
+      })
+    );
   };
 };
 
