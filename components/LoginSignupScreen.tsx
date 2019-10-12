@@ -17,28 +17,34 @@ import {
   Right,
   View,
   Icon,
-  Spinner
+  Spinner,
+  Row
 } from "native-base";
 import { StoreProps, connection } from "../store";
 import { NavigationInjectedProps } from "react-navigation";
+import { HeaderTitle } from "react-navigation-stack";
 class LoginState {
   signup? = true;
-  username?: string = "benedikt3";
-  email?: string = "bene.kantz3@gmail.com";
-  first_name?: string = "Benedikt";
+  username?: string = "";
+  email?: string = "";
+  first_name?: string = "";
 
-  last_name?: string = "Kantz";
-  password?: string = "Bene220000";
+  last_name?: string = "";
+  password?: string = " ";
+  internal_error? = "";
   constructor() {}
 }
+type LoginStateErrors = {
+  [P in keyof LoginState]: boolean;
+};
 
 class LoginSignupScreen extends React.Component<
   StoreProps & NavigationInjectedProps,
-  LoginState
+  LoginState & { errors: LoginStateErrors }
 > {
   constructor(props) {
     super(props);
-    this.state = {};
+    this.state = { errors: {} };
   }
   public componentDidMount = () => {
     console.log(this.state);
@@ -64,17 +70,50 @@ class LoginSignupScreen extends React.Component<
     this.props.navigation.setParams({ signup });
     this.setState({ signup });
   };
+  private checkField(field: keyof LoginState, errors: LoginStateErrors) {
+    let error =
+      this.state[field] &&
+      typeof this.state[field] === "string" &&
+      (this.state[field] as string).length > 0;
+    errors[field] = !error;
+    return errors;
+  }
   public submit = () => {
+    let errors = this.checkField("email", this.state.errors);
+    this.checkField("password", errors);
+
     if (this.state.signup) {
-      this.props.createUser(
-        this.state.username,
-        this.state.email,
-        this.state.first_name,
-        this.state.last_name,
-        this.state.password
-      );
+      this.checkField("username", errors);
+      this.checkField("first_name", errors);
+      this.checkField("last_name", errors);
+    }
+
+    let oneError = false;
+    for (const key in errors) {
+      if (errors.hasOwnProperty(key)) {
+        if (errors[key]) {
+          oneError = true;
+        }
+      }
+    }
+
+    this.setState({ errors });
+    console.log(errors);
+    if (!oneError) {
+      this.setState({ internal_error: null });
+      if (this.state.signup) {
+        this.props.createUser(
+          this.state.username,
+          this.state.email,
+          this.state.first_name,
+          this.state.last_name,
+          this.state.password
+        );
+      } else {
+        this.props.login(this.state.email, this.state.password);
+      }
     } else {
-      this.props.login(this.state.email, this.state.password);
+      this.setState({ internal_error: "Please check the marked fields!" });
     }
   };
   static navigationOptions = ({ navigation }) => {
@@ -84,67 +123,105 @@ class LoginSignupScreen extends React.Component<
   };
   render() {
     return (
-      <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-        <Header></Header>
-        <Form>
-          <Item stackedLabel>
-            <Label>E-Mail</Label>
-            <Input
-              onChangeText={this.onChangeEmail}
-              autoCompleteType="email"
-              autoCapitalize="none"
-            />
-          </Item>
-          {this.state.signup && (
-            <React.Fragment>
-              <Item stackedLabel>
-                <Label>Username</Label>
-                <Input
-                  onChangeText={this.onChangeUserName}
-                  autoCompleteType="username"
-                  autoCapitalize="none"
-                />
-              </Item>
-              <Item stackedLabel>
-                <Label>First Name</Label>
-                <Input
-                  onChangeText={this.onChangeFirstName}
-                  autoCompleteType="name"
-                />
-              </Item>
-              <Item stackedLabel>
-                <Label>Last Name</Label>
-                <Input onChangeText={this.onChangeLastName} />
-              </Item>
-            </React.Fragment>
-          )}
-          <Item stackedLabel>
-            <Label>Password</Label>
-            <Input
-              onChangeText={this.onChangePassword}
-              autoCompleteType="password"
-              secureTextEntry={true}
-              autoCapitalize="none"
-            />
-          </Item>
-          {this.props.user.signingUp ||
-            (this.props.user.loggingIn && <Spinner color="blue" />)}
-          <Grid>
-            <Col style={{ height: 100 }}>
-              <Button primary onPress={this.submit}>
-                <Text> {this.state.signup ? "Sign Up!" : "Login"} </Text>
-              </Button>
-            </Col>
-            <Col style={{ height: 100 }}>
-              <Button transparent onPress={this.toggleSignup}>
-                <Text>
-                  {this.state.signup ? "Login" : "Sign up"} instead...
+      <>
+        <View
+          style={{
+            flex: 1,
+            alignItems: "stretch",
+            justifyContent: "flex-start",
+            paddingTop: 50
+          }}
+        >
+          <Text style={{ textAlign: "center", paddingBottom: 30 }}>
+            Sign up for some scity bikes!
+          </Text>
+          <Form>
+            <Item error={this.state.errors.email}>
+              <Input
+                onChangeText={this.onChangeEmail}
+                autoCompleteType="email"
+                autoCapitalize="none"
+                placeholder="E-Mail"
+              ></Input>
+            </Item>
+            {this.state.signup && (
+              <React.Fragment>
+                <Item error={this.state.errors.username}>
+                  <Input
+                    onChangeText={this.onChangeUserName}
+                    autoCompleteType="username"
+                    autoCapitalize="none"
+                    placeholder="Username"
+                  ></Input>
+                </Item>
+                <Item error={this.state.errors.first_name}>
+                  <Input
+                    onChangeText={this.onChangeFirstName}
+                    autoCompleteType="name"
+                    placeholder="First Name"
+                  ></Input>
+                </Item>
+                <Item error={this.state.errors.last_name}>
+                  <Input
+                    onChangeText={this.onChangeLastName}
+                    placeholder="Last Name"
+                  ></Input>
+                </Item>
+              </React.Fragment>
+            )}
+            <Item error={this.state.errors.password}>
+              <Input
+                onChangeText={this.onChangePassword}
+                autoCompleteType="password"
+                secureTextEntry={true}
+                autoCapitalize="none"
+                placeholder="Password"
+              ></Input>
+            </Item>
+            <Grid style={{ padding: 10 }}>
+              <Col>
+                <Button primary onPress={this.submit}>
+                  <Text> {this.state.signup ? "Sign Up!" : "Login"} </Text>
+                </Button>
+              </Col>
+              <Col>
+                <Button transparent onPress={this.toggleSignup}>
+                  <Text>
+                    {this.state.signup ? "Login" : "Sign up"} instead...
+                  </Text>
+                </Button>
+              </Col>
+            </Grid>
+            <Grid style={{ paddingTop: 50 }}>
+              {(this.props.user.signingUp || this.props.user.loggingIn) && (
+                <Row
+                  style={{
+                    justifyContent: "center"
+                  }}
+                >
+                  <Spinner color="blue" />
+                </Row>
+              )}
+
+              <Row
+                style={{
+                  justifyContent: "flex-start", 
+                  flex: 1,
+                  flexBasis: 50,
+                  alignItems: "stretch"
+                }}
+              >
+                <Text style={{ color: "darkred", textAlign:"center" }}>
+                  Hi123
+                  {this.state.internal_error
+                    ? this.state.internal_error
+                    : this.props.user.lastError}
                 </Text>
-              </Button>
-            </Col>
-          </Grid>
-        </Form>
-      </View>
+              </Row>
+            </Grid>
+          </Form>
+        </View>
+      </>
     );
   }
 }
